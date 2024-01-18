@@ -180,7 +180,7 @@ set COMMAND=%JAVA% %KAFKA_HEAP_OPTS% %KAFKA_JVM_PERFORMANCE_OPTS% %KAFKA_JMX_OPT
 rem echo.
 rem echo %COMMAND%
 rem echo.
-%COMMAND%
+echo %COMMAND%
 
 goto :eof
 :concat

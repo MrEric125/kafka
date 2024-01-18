@@ -62,6 +62,10 @@ import org.slf4j.Logger;
  * <p>
  * The accumulator uses a bounded amount of memory and append calls will block when that memory is exhausted, unless
  * this behavior is explicitly disabled.
+ *
+ * 主要用来缓存消息，以便Sender线程以批量发送，进而减少网络传输的资源消耗提升性能
+ *
+ * 可通过buffer.memory 来设置，默认值32M
  */
 public final class RecordAccumulator {
 

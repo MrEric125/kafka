@@ -176,6 +176,8 @@ public class KafkaConsumerTest {
 
         MockMetricsReporter mockMetricsReporter = (MockMetricsReporter) consumer.metrics.reporters().get(0);
 
+
+
         Assert.assertEquals(consumer.getClientId(), mockMetricsReporter.clientId);
         consumer.close();
     }
