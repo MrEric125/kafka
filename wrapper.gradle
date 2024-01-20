@@ -82,4 +82,4 @@ wrapper.finalizedBy bootstrapWrapper
 task removeWindowsScript(type: Delete) {
     delete "$rootDir/gradlew.bat"
 }
-wrapper.finalizedBy removeWindowsScript
+//wrapper.finalizedBy removeWindowsScript
