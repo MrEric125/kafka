@@ -15,7 +15,6 @@ rem See the License for the specific language governing permissions and
 rem limitations under the License.
 
 setlocal enabledelayedexpansion
-
 IF [%1] EQU [] (
 	echo USAGE: %0 classname [opts]
 	EXIT /B 1

@@ -20,7 +20,13 @@ import java.nio.charset.StandardCharsets
 
 buildscript {
   repositories {
-    mavenCentral()
+//		mavenCentral()
+//		maven { url "https://repo.spring.io/libs-spring-framework-build" }
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/central' }
+    maven { url "https://maven.aliyun.com/repository/spring" }  // 添加Spring依赖源
+    maven { url "https://maven.aliyun.com/repository/spring-plugin" }  // 添加Spring依赖源
+    maven { url "https://maven.aliyun.com/repository/gradle-plugin" }  // 添加Spring依赖源
   }
   apply from: "$rootDir/gradle/dependencies.gradle"
 
@@ -117,7 +123,11 @@ ext {
 allprojects {
 
   repositories {
-    mavenCentral()
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/central' }
+    maven { url "https://maven.aliyun.com/repository/spring" }  // 添加Spring依赖源
+    maven { url "https://maven.aliyun.com/repository/spring-plugin" }  // 添加Spring依赖源
+    maven { url "https://maven.aliyun.com/repository/gradle-plugin" }  // 添加Spring依赖源
   }
 
   dependencyUpdates {
@@ -952,17 +962,17 @@ project(':core') {
       // Dropwizard Metrics are required by ZooKeeper as of v3.6.0,
       // but the library should *not* be used in Kafka code
       implementation libs.dropwizardMetrics
-      exclude module: 'slf4j-log4j12'
-      exclude module: 'log4j'
+//      exclude module: 'slf4j-log4j12'
+//      exclude module: 'log4j'
       // Both Kafka and Zookeeper use slf4j. ZooKeeper moved from log4j to logback in v3.8.0, but Kafka relies on reload4j.
       // We are removing Zookeeper's dependency on logback so we have a singular logging backend.
-      exclude module: 'logback-classic'
-      exclude module: 'logback-core'
+//      exclude module: 'logback-classic'
+//      exclude module: 'logback-core'
     }
     // ZooKeeperMain depends on commons-cli but declares the dependency as `provided`
     implementation libs.commonsCli
 
-    compileOnly libs.log4j
+    implementation libs.log4j
 
     testImplementation project(':clients').sourceSets.test.output
     testImplementation project(':group-coordinator').sourceSets.test.output
