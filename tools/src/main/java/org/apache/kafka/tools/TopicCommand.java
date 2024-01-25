@@ -453,7 +453,6 @@ public abstract class TopicCommand {
             if (topic.partitions.filter(p -> p < 1).isPresent()) {
                 throw new IllegalArgumentException("The partitions must be greater than 0");
             }
-
             try {
                 NewTopic newTopic;
                 if (topic.hasReplicaAssignment()) {
@@ -468,6 +467,7 @@ public abstract class TopicCommand {
                 newTopic.configs(configsMap);
                 CreateTopicsResult createResult = adminClient.createTopics(Collections.singleton(newTopic),
                     new CreateTopicsOptions().retryOnQuotaViolation(false));
+                LOG.debug("createTopic,result:{}", createResult);
                 createResult.all().get();
                 System.out.println("Created topic " + topic.name + ".");
             } catch (ExecutionException e) {
