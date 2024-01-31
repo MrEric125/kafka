@@ -57,6 +57,8 @@ public enum BrokerState {
     /**
      * The broker has caught up with cluster metadata, but has not yet
      * been unfenced by the controller.
+     *
+     * broker 已经追赶上了集群的元数据，但是还没有被控制器排除在外
      */
     RECOVERY((byte) 2),
 

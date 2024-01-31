@@ -289,6 +289,8 @@ import static org.apache.kafka.common.utils.Utils.closeQuietly;
  * This class is thread-safe.
  * </p>
  * The API of this class is evolving, see {@link Admin} for details.
+ *
+ * 对于与服务端的broker的通信，KafkaAdminClient，其实就是{@link KafkaClient} 的包装类，对其进行了功能的拓展
  */
 @InterfaceStability.Evolving
 public class KafkaAdminClient extends AdminClient {
@@ -911,8 +913,7 @@ public class KafkaAdminClient extends AdminClient {
             // If the exception is not retriable, fail.
             if (!(throwable instanceof RetriableException)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("{} failed with non-retriable exception after {} attempt(s)", this, tries,
-                        new Exception(prettyPrintException(throwable)));
+                    log.debug("{} failed with non-retriable exception after {} attempt(s)", this, tries, new Exception(prettyPrintException(throwable)));
                 }
                 handleFailure(throwable);
                 return;
@@ -923,8 +924,7 @@ public class KafkaAdminClient extends AdminClient {
                 return;
             }
             if (log.isDebugEnabled()) {
-                log.debug("{} failed: {}. Beginning retry #{}",
-                    this, prettyPrintException(throwable), tries);
+                log.debug("{} failed: {}. Beginning retry #{}", this, prettyPrintException(throwable), tries);
             }
             maybeRetry(now, throwable);
         }
@@ -935,14 +935,12 @@ public class KafkaAdminClient extends AdminClient {
 
         private void handleTimeoutFailure(long now, Throwable cause) {
             if (log.isDebugEnabled()) {
-                log.debug("{} timed out at {} after {} attempt(s)", this, now, tries,
-                    new Exception(prettyPrintException(cause)));
+                log.debug("{} timed out at {} after {} attempt(s)", this, now, tries, new Exception(prettyPrintException(cause)));
             }
             if (cause instanceof TimeoutException) {
                 handleFailure(cause);
             } else {
-                handleFailure(new TimeoutException(this + " timed out at " + now
-                    + " after " + tries + " attempt(s)", cause));
+                handleFailure(new TimeoutException(this + " timed out at " + now + " after " + tries + " attempt(s)", cause));
             }
         }
 
@@ -984,8 +982,7 @@ public class KafkaAdminClient extends AdminClient {
 
         @Override
         public String toString() {
-            return "Call(callName=" + callName + ", deadlineMs=" + deadlineMs +
-                ", tries=" + tries + ", nextAllowedTryMs=" + nextAllowedTryMs + ")";
+            return "Call(callName=" + callName + ", deadlineMs=" + deadlineMs + ", tries=" + tries + ", nextAllowedTryMs=" + nextAllowedTryMs + ")";
         }
 
         public boolean isInternal() {
@@ -1127,8 +1124,7 @@ public class KafkaAdminClient extends AdminClient {
         private int timeoutCallsToSend(TimeoutProcessor processor) {
             int numTimedOut = 0;
             for (List<Call> callList : callsToSend.values()) {
-                numTimedOut += processor.handleTimeouts(callList,
-                    "Timed out waiting to send the call.");
+                numTimedOut += processor.handleTimeouts(callList, "Timed out waiting to send the call.");
             }
             if (numTimedOut > 0)
                 log.debug("Timed out {} call(s) with assigned nodes.", numTimedOut);
@@ -1233,9 +1229,7 @@ public class KafkaAdminClient extends AdminClient {
                     Long deadline = nodeReadyDeadlines.get(node);
                     if (deadline != null) {
                         if (now >= deadline) {
-                            log.info("Disconnecting from {} and revoking {} node assignment(s) " +
-                                "because the node is taking too long to become ready.",
-                                node.idString(), calls.size());
+                            log.info("Disconnecting from {} and revoking {} node assignment(s) because the node is taking too long to become ready.", node.idString(), calls.size());
                             transitionToPendingAndClearList(calls);
                             client.disconnect(node.idString());
                             nodeReadyDeadlines.remove(node);
@@ -1262,20 +1256,17 @@ public class KafkaAdminClient extends AdminClient {
                 }
                 while (!calls.isEmpty()) {
                     Call call = calls.remove(0);
-                    int timeoutMs = Math.min(remainingRequestTime,
-                        calcTimeoutMsRemainingAsInt(now, call.deadlineMs));
+                    int timeoutMs = Math.min(remainingRequestTime, calcTimeoutMsRemainingAsInt(now, call.deadlineMs));
                     AbstractRequest.Builder<?> requestBuilder;
                     try {
                         requestBuilder = call.createRequest(timeoutMs);
                     } catch (Throwable t) {
-                        call.fail(now, new KafkaException(String.format(
-                            "Internal error sending %s to %s.", call.callName, node), t));
+                        call.fail(now, new KafkaException(String.format("Internal error sending %s to %s.", call.callName, node), t));
                         continue;
                     }
-                    ClientRequest clientRequest = client.newClientRequest(node.idString(),
-                        requestBuilder, now, true, timeoutMs, null);
-                    log.debug("Sending {} to {}. correlationId={}, timeoutMs={}",
-                        requestBuilder, node, clientRequest.correlationId(), timeoutMs);
+                    ClientRequest clientRequest = client.newClientRequest(node.idString(), requestBuilder, now, true, timeoutMs, null);
+                    log.debug("Sending {} to {}. correlationId={}, timeoutMs={}", requestBuilder, node, clientRequest.correlationId(), timeoutMs);
+                    // louis 客户端发送请求
                     client.send(clientRequest, now);
                     callsInFlight.put(node.idString(), call);
                     correlationIdToCalls.put(clientRequest.correlationId(), call);
@@ -1501,10 +1492,13 @@ public class KafkaAdminClient extends AdminClient {
 
                 // Wait for network responses.
                 log.trace("Entering KafkaClient#poll(timeout={})", pollTimeout);
+
+                // 客户端在这一步尝试将数据发送出去
                 List<ClientResponse> responses = client.poll(Math.max(0L, pollTimeout), now);
                 log.trace("KafkaClient#poll retrieved {} response(s)", responses.size());
 
                 // unassign calls to disconnected nodes
+                //取消对断开连接的节点的呼叫分配
                 unassignUnsentCalls(client::connectionFailed);
 
                 // Update the current time and handle the latest responses.
@@ -1519,6 +1513,8 @@ public class KafkaAdminClient extends AdminClient {
          * If the AdminClient thread has exited, this will fail. Otherwise, it will succeed (even
          * if the AdminClient is shutting down). This function should called when retrying an
          * existing call.
+         *
+         * 将呼叫排队发送。如果AdminClient线程已退出，则此操作将失败。否则，它将成功(即使AdminClient正在关闭)。此函数应在重试现有调用时调用。
          *
          * @param call      The new call object.
          * @param now       The current time in milliseconds.

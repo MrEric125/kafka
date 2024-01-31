@@ -351,9 +351,13 @@ public class Selector implements Selectable, AutoCloseable {
 
     /**
      * Interrupt the nioSelector if it is blocked waiting to do I/O.
+     * 在使用Selector对象的 select() 或者 select(long) 方法时候，当前线程很可能一直阻塞下去，
+     *      那么用另一个线程去执行 Selector.wakeUp() 方法会唤醒当前被阻塞的线程，使其 select() 立即返回。
+     * 当然，如果当前线程没有阻塞，那么执行了wakeUp() 方法之后，下一个线程的 select() 方法会被立即返回，不再被阻塞下去。
      */
     @Override
     public void wakeup() {
+
         this.nioSelector.wakeup();
     }
 
@@ -474,6 +478,7 @@ public class Selector implements Selectable, AutoCloseable {
                 keysWithBufferedRead.removeAll(readyKeys); //so no channel gets polled twice
                 Set<SelectionKey> toPoll = keysWithBufferedRead;
                 keysWithBufferedRead = new HashSet<>(); //poll() calls will repopulate if needed
+                //索然名字叫poll 但是其实这个地方是会将数据推送到nio的channel 中
                 pollSelectionKeys(toPoll, false, endSelect);
             }
 
@@ -590,6 +595,7 @@ public class Selector implements Selectable, AutoCloseable {
 
                 long nowNanos = channelStartTimeNanos != 0 ? channelStartTimeNanos : currentTimeNanos;
                 try {
+
                     attemptWrite(key, channel, nowNanos);
                 } catch (Exception e) {
                     sendFailed = true;
@@ -658,7 +664,10 @@ public class Selector implements Selectable, AutoCloseable {
 
     private Collection<SelectionKey> determineHandlingOrder(Set<SelectionKey> selectionKeys) {
         //it is possible that the iteration order over selectionKeys is the same every invocation.
+        //在每次调用中，对selectionKeys的迭代顺序可能是相同的。
         //this may cause starvation of reads when memory is low. to address this we shuffle the keys if memory is low.
+        // 当内存不足时，这可能会导致读取失败。为了解决这个问题，我们在内存不足的情况下对键进行洗牌。
+        // todo 什么情况下会导致内存不足？
         if (!outOfMemory && memoryPool.availableMemory() < lowMemThreshold) {
             List<SelectionKey> shuffledKeys = new ArrayList<>(selectionKeys);
             Collections.shuffle(shuffledKeys);

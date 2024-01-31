@@ -1546,7 +1546,7 @@ project(':clients') {
   compileJava.dependsOn 'processMessages'
   srcJar.dependsOn 'processMessages'
 
-  compileTestJava.dependsOn 'processTestMessages'
+//  compileTestJava.dependsOn 'processTestMessages'
 
   javadoc {
     include "**/org/apache/kafka/clients/admin/*"

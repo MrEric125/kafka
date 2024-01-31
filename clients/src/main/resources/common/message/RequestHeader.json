@@ -28,6 +28,7 @@
       "about": "The API key of this request." },
     { "name": "RequestApiVersion", "type": "int16", "versions": "0+",
       "about": "The API version of this request." },
+//    由客户端制定的一个数字来唯一标识这次请求的id,服务端在处理完请求后也会把同样的correlationId写到response中去
     { "name": "CorrelationId", "type": "int32", "versions": "0+",
       "about": "The correlation ID of this request." },
 

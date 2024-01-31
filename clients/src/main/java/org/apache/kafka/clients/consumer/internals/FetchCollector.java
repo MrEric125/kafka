@@ -165,12 +165,9 @@ public class FetchCollector<K, V> {
                 throw new IllegalStateException("Missing position for fetchable partition " + tp);
 
             if (nextInLineFetch.nextFetchOffset() == position.offset) {
-                List<ConsumerRecord<K, V>> partRecords = nextInLineFetch.fetchRecords(fetchConfig,
-                        deserializers,
-                        maxRecords);
+                List<ConsumerRecord<K, V>> partRecords = nextInLineFetch.fetchRecords(fetchConfig, deserializers, maxRecords);
 
-                log.trace("Returning {} fetched records at offset {} for assigned partition {}",
-                        partRecords.size(), position, tp);
+                log.trace("Returning {} fetched records at offset {} for assigned partition {}", partRecords.size(), position, tp);
 
                 boolean positionAdvanced = false;
 

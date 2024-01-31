@@ -56,6 +56,14 @@ import scala.annotation.nowarn
  * size or I/O rate.
  *
  * A background thread handles log retention by periodically truncating excess log segments.
+ *
+ * kafka日志管理子系统的入口点。
+ * 日志管理器负责日志的创建、检索和清理。所有的读写操作都委托给各个日志实例。
+ *
+ * 日志管理器在一个或多个目录中维护日志。
+ * 在日志最少的数据目录中创建新的日志。
+ * 在事实或基于大小或IO速率的平衡之后，不会尝试移动分区。
+ * 后台线程通过定期截断多余的日志段来处理日志保留。
  */
 @threadsafe
 class LogManager(logDirs: Seq[File],

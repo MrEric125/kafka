@@ -10,7 +10,16 @@
 
    (program variable `-Dlog4j.configuration=file:D:\idea-project\kafka\config/log4j.properties` )
    (vm option `D:\idea-project\kafka\config\server.properties`)
+8. 配置客户端日志输出格式：
+```properties
+log4j.rootLogger=DEBUG, stdout, kafkaAppender
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=[%d]%p [%t] (%c:%L) %m %n
+```
+9. 启动创建topic 客户端
+   配置vm option
 
-## 创建topic 流程
-   客户端： `kafka.tools.TopicCommand#createTopic`  --> `adminClient.createTopics`  --> 
-   
+## 网络模式
+  todo 写一个基于nio网络发送与接收到的demo
+https://cloud.tencent.com/developer/article/1860682

@@ -511,11 +511,9 @@ public class NetworkClient implements KafkaClient {
             if (versionInfo == null) {
                 version = builder.latestAllowedVersion();
                 if (discoverBrokerVersions && log.isTraceEnabled())
-                    log.trace("No version information found when sending {} with correlation id {} to node {}. " +
-                            "Assuming version {}.", clientRequest.apiKey(), clientRequest.correlationId(), nodeId, version);
+                    log.trace("No version information found when sending {} with correlation id {} to node {}. Assuming version {}.", clientRequest.apiKey(), clientRequest.correlationId(), nodeId, version);
             } else {
-                version = versionInfo.latestUsableVersion(clientRequest.apiKey(), builder.oldestAllowedVersion(),
-                        builder.latestAllowedVersion());
+                version = versionInfo.latestUsableVersion(clientRequest.apiKey(), builder.oldestAllowedVersion(), builder.latestAllowedVersion());
             }
             // The call to build may also throw UnsupportedVersionException, if there are essential
             // fields that cannot be represented in the chosen version.
@@ -523,8 +521,7 @@ public class NetworkClient implements KafkaClient {
         } catch (UnsupportedVersionException unsupportedVersionException) {
             // If the version is not supported, skip sending the request over the wire.
             // Instead, simply add it to the local queue of aborted requests.
-            log.debug("Version mismatch when attempting to send {} with correlation id {} to {}", builder,
-                    clientRequest.correlationId(), clientRequest.destination(), unsupportedVersionException);
+            log.debug("Version mismatch when attempting to send {} with correlation id {} to {}", builder, clientRequest.correlationId(), clientRequest.destination(), unsupportedVersionException);
             ClientResponse clientResponse = new ClientResponse(clientRequest.makeHeader(builder.latestAllowedVersion()),
                     clientRequest.callback(), clientRequest.destination(), now, now,
                     false, unsupportedVersionException, null, null);
@@ -542,18 +539,12 @@ public class NetworkClient implements KafkaClient {
         String destination = clientRequest.destination();
         RequestHeader header = clientRequest.makeHeader(request.version());
         if (log.isDebugEnabled()) {
-            log.debug("Sending {} request with header {} and timeout {} to node {}: {}",
-                clientRequest.apiKey(), header, clientRequest.requestTimeoutMs(), destination, request);
+            log.debug("Sending {} request with header {} and timeout {} to node {}: {}", clientRequest.apiKey(), header, clientRequest.requestTimeoutMs(), destination, request);
         }
         Send send = request.toSend(header);
-        InFlightRequest inFlightRequest = new InFlightRequest(
-                clientRequest,
-                header,
-                isInternalRequest,
-                request,
-                send,
-                now);
+        InFlightRequest inFlightRequest = new InFlightRequest(clientRequest, header, isInternalRequest, request, send, now);
         this.inFlightRequests.add(inFlightRequest);
+//        send is ByteBufferSend
         selector.send(new NetworkSend(clientRequest.destination(), send));
     }
 
