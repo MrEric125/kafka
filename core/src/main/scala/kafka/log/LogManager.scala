@@ -91,8 +91,14 @@ class LogManager(logDirs: Seq[File],
 
   private val metricsGroup = new KafkaMetricsGroup(this.getClass)
 
+  /**
+   * 默认情况下定时任务的延迟时间
+   */
   val InitialTaskDelayMs = 30 * 1000
 
+  /**
+   * 文件增删的锁
+   */
   private val logCreationOrDeletionLock = new Object
   private val currentLogs = new Pool[TopicPartition, UnifiedLog]()
   // Future logs are put in the directory with "-future" suffix. Future log is created when user wants to move replica
@@ -793,6 +799,8 @@ class LogManager(logDirs: Seq[File],
   /**
    * Write out the current recovery point for all logs to a text file in the log directory
    * to avoid recovering the whole log on startup.
+   *
+   * 将所有日志的当前恢复点写到日志目录中的一个文本文件中，以避免在启动时恢复整个日志。
    */
   def checkpointLogRecoveryOffsets(): Unit = {
     val logsByDirCached = logsByDir
@@ -804,7 +812,9 @@ class LogManager(logDirs: Seq[File],
 
   /**
    * Write out the current log start offset for all logs to a text file in the log directory
-   * to avoid exposing data that have been deleted by DeleteRecordsRequest
+   * to avoid exposing data that have been deleted by
+   *
+   * 将所有日志的当前日志开始偏移量写到日志目录中的一个文本文件中，以避免暴露已被DeleteRecordsRequest删除的数据
    */
   def checkpointLogStartOffsets(): Unit = {
     val logsByDirCached = logsByDir
@@ -1123,6 +1133,12 @@ class LogManager(logDirs: Seq[File],
    *  considered for deletion in the next iteration of `deleteLogs`. The next iteration will be executed
    *  after the remaining time for the first log that is not deleted. If there are no more `logsToBeDeleted`,
    *  `deleteLogs` will be executed after `currentDefaultConfig.fileDeleteDelayMs`.
+   *
+   *  删除标记为删除的日志。删除包含“currentDefaultConfig”的所有日志。
+   *  fileDeleteDelayMs '在计划删除后已经过期。该时间间隔尚未过期的日志将在' deleteLogs '的下一次迭代中考虑删除。
+   *  下一次迭代将在未删除的第一个日志的剩余时间之后执行。
+   *  如果没有' logsToBeDeleted '，
+   *  ' deletlogs '将在' currentDefaultConfig.fileDeleteDelayMs '之后执行。
    */
   private def deleteLogs(): Unit = {
     var nextDelayMs = 0L
@@ -1332,6 +1348,7 @@ class LogManager(logDirs: Seq[File],
   /**
    * Delete any eligible logs. Return the number of segments deleted.
    * Only consider logs that are not compacted.
+   * 删除所有符合条件的日志。返回删除的段数。只考虑未压缩的日志。
    */
   def cleanupLogs(): Unit = {
     debug("Beginning log cleanup...")
@@ -1420,6 +1437,7 @@ class LogManager(logDirs: Seq[File],
 
   /**
    * Flush any log which has exceeded its flush interval and has unwritten messages.
+   * 清除任何超过其清除间隔并且有未写消息的日志。
    */
   private def flushDirtyLogs(): Unit = {
     debug("Checking for dirty logs to flush...")

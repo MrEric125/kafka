@@ -418,6 +418,7 @@ class KafkaServer(
       _kafkaController = new KafkaController(config, zkClient, time, metrics, brokerInfo, brokerEpoch, tokenManager, brokerFeatures, metadataCache, threadNamePrefix)
       kafkaController.startup()
 
+//       ZK to KRaft Migration configs
       if (config.migrationEnabled) {
         logger.info("Starting up additional components for ZooKeeper migration")
         lifecycleManager = new BrokerLifecycleManager(config,

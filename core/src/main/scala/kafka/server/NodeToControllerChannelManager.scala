@@ -138,6 +138,11 @@ class RaftControllerNodeProvider(
  * and connect to the controller. The channel is async and runs the network connection in the background.
  * The maximum number of in-flight requests are set to one to ensure orderly response from the controller, therefore
  * care must be taken to not block on outstanding requests for too long.
+ *
+ *
+ * 该类管理代理和控制器之间的连接。它运行一个[[NodeToControllerRequestThread]]，
+ * 它使用代理的元数据缓存作为自己的元数据来查找和连接到控制器。该通道是异步的，并在后台运行网络连接。
+ * 飞行中请求的最大数量被设置为1，以确保控制器的有序响应，因此必须注意不要长时间阻塞未完成的请求。
  */
 class NodeToControllerChannelManagerImpl(
   controllerNodeProvider: ControllerNodeProvider,
