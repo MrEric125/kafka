@@ -190,6 +190,7 @@ public abstract class AbstractIndex implements Closeable {
         try {
             int roundedNewSize = roundDownToExactMultiple(newSize, entrySize());
 
+            log.info("中文测试。。。。");
             if (length == roundedNewSize) {
                 log.debug("Index {} was not resized because it already has size {}", file.getAbsolutePath(), roundedNewSize);
                 return false;

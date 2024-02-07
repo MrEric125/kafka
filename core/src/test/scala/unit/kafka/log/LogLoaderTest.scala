@@ -169,7 +169,9 @@ class LogLoaderTest {
 
     def initializeLogManagerForSimulatingErrorTest(logDirFailureChannel: LogDirFailureChannel = new LogDirFailureChannel(logDirs.size)
                                                   ): (LogManager, Executable) = {
+      // 创建 .lock recovery-point-offset-checkpoint and log-start-offset-checkpoint 文件
       val logManager: LogManager = interceptedLogManager(logConfig, logDirs, logDirFailureChannel)
+      // 创建日志文件夹以及里面初始文件
       log = logManager.getOrCreateLog(topicPartition, isNew = true, topicId = None)
 
       assertFalse(logDirFailureChannel.hasOfflineLogDir(logDir.getAbsolutePath), "log dir should not be offline before load logs")
@@ -183,6 +185,7 @@ class LogLoaderTest {
     }
 
     val cleanShutdownFileHandler = new CleanShutdownFileHandler(logDir.getPath)
+    // 定义一个方法内的局部变量
     locally {
       val (logManager, _) = initializeLogManagerForSimulatingErrorTest()
 

@@ -59,6 +59,13 @@ import static java.util.Arrays.asList;
  * A segment with a base offset of [base_offset] would be stored in two files, a [base_offset].index and a [base_offset].log file.
  *
  * This class is not thread-safe.
+ *
+ * 日志的一段。每个段有两个组件:日志和索引。
+ * 日志是包含实际消息的FileRecords。
+ * 索引是一个OffsetIndex，它从逻辑偏移量映射到物理文件位置。
+ * 每个段都有一个基本偏移量，该偏移量<=此段中任何消息的最小偏移量和>任何先前段中的任何偏移量。
+ * 基本偏移量为[base_offset]的段将存储在两个文件中，一个是[base_offset]。
+ * 索引和[base_offset].log文件。这个类不是线程安全的。
  */
 public class LogSegment implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogSegment.class);

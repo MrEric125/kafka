@@ -1023,8 +1023,9 @@ class LogManager(logDirs: Seq[File],
     logCreationOrDeletionLock synchronized {
       val log = getLog(topicPartition, isFuture).getOrElse {
         // create the log if it has not already been created in another thread
-        if (!isNew && offlineLogDirs.nonEmpty)
+        if (!isNew && offlineLogDirs.nonEmpty) {
           throw new KafkaStorageException(s"Can not create log for $topicPartition because log directories ${offlineLogDirs.mkString(",")} are offline")
+        }
 
         val logDirs: List[File] = {
           val preferredLogDir = targetLogDirectoryId.filterNot(Seq(DirectoryId.UNASSIGNED,DirectoryId.LOST).contains) match {

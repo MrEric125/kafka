@@ -152,6 +152,7 @@ class LogLoader(
 
     val (newRecoveryPoint: Long, nextOffset: Long) = {
       if (!dir.getAbsolutePath.endsWith(UnifiedLog.DeleteDirSuffix)) {
+        // 创建.index 和.log 文件
         val (newRecoveryPoint, nextOffset) = retryOnOffsetOverflow(recoverLog)
 
         // reset the index size of the currently active log segment to allow more entries
